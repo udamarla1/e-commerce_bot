@@ -16,6 +16,9 @@ from langchain_core.output_parsers import StrOutputParser
 from openai import OpenAI
 from dotenv import load_dotenv
 from pathlib import Path
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
 
 DATA_FILE = Path(__file__).parent / "prod_small2.csv"
 
@@ -81,10 +84,27 @@ retrieval_chain = create_retrieval_chain(
     documents_chain
 )
 
-retrieval_chain.invoke({"input": "what are some of the best shoes available?"})
 
-print("Retrieval chain invoked successfully.")
-print(f"response: {retrieval_chain.invoke({'input': 'what are some of the best shoes available?'})} ")
+@app.get("/")
+def health_check():
+    return jsonify({"status": "ok", "service": "e-commerce product search"})
+
+
+@app.post("/search")
+def search_products():
+    payload = request.get_json(silent=True) or {}
+    user_query = payload.get("query", "").strip()
+
+    if not user_query:
+        return jsonify({"error": "query is required"}), 400
+
+    result = retrieval_chain.invoke({"input": user_query})
+    return jsonify({"answer": result["answer"]})
+
+
+if __name__ == "__main__":
+    print("Retrieval chain invoked successfully.")
+    print(retrieval_chain.invoke({"input": "what are some of the best shoes available?"}))
 
 
 
