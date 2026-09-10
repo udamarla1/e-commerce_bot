@@ -14,8 +14,16 @@ from langchain_classic.chains.combine_documents import create_stuff_documents_ch
 from langchain_classic.chains import create_retrieval_chain
 from langchain_core.output_parsers import StrOutputParser
 from openai import OpenAI
+from dotenv import load_dotenv
+from pathlib import Path
 
-df = pd.read_csv('/Users/rushika/Desktop/e-commerce_bot/src/prod_small2.csv')
+DATA_FILE = Path(__file__).parent / "prod_small2.csv"
+
+load_dotenv()
+if not os.getenv("OPENAI_API_KEY") and os.getenv("openai_api_key"):
+    os.environ["OPENAI_API_KEY"] = os.environ["openai_api_key"]
+
+df = pd.read_csv(DATA_FILE)
 
 if not os.getenv("OPENAI_API_KEY"):
     print("Warning: OPENAI_API_KEY is not set. Set it before running the app.")
@@ -63,16 +71,14 @@ prompt = ChatPromptTemplate.from_template(
     {context}
     </context>
 
-    Question: {input}""",
-    output_parser=output_parser  # The output parser ensures that the response is returned in a structured string format.
+    Question: {input}"""
 )
 
 documents_chain = create_stuff_documents_chain(llmBrain, prompt)
 
 retrieval_chain = create_retrieval_chain(
-    llmBrain,
-    retriever=vectorstore.as_retriever(),
-    combine_documents_chain=documents_chain
+    vectorstore.as_retriever(),
+    documents_chain
 )
 
 retrieval_chain.invoke({"input": "what are some of the best shoes available?"})

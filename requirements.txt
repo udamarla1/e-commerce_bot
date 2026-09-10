@@ -1,0 +1,12 @@
+faiss-cpu==1.15.0
+gradio==6.26.0
+langchain-classic==1.0.8
+langchain-community==0.4.2
+langchain-core==1.6.2
+langchain-openai==1.6.2
+langchain-text-splitters==1.1.2
+numpy==2.5.3
+openai==3.12.0
+pandas==3.0.5
+python-dotenv==1.2.3
+pytest==9.0.1
